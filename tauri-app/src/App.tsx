@@ -28,7 +28,10 @@ export default function App() {
   const pendingText = useRef("");
 
   const handleTranscript = useCallback(async (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim()) {
+      setStatus("idle");
+      return;
+    }
     pendingText.current = text;
     setStatus("thinking");
 
@@ -72,29 +75,24 @@ export default function App() {
     <div style={styles.shell}>
       <div style={styles.header}>
         <span style={styles.headerTitle}>♫ Music</span>
-        <div style={styles.headerActions}>
-          <button
-            style={{ ...styles.iconBtn, color: debugEnabled ? "#e5342a" : "rgba(255,255,255,0.4)" }}
-            title="Debug mode"
-            onClick={() => setDebugEnabled((v) => !v)}
-          >
-            ⚙
-          </button>
-          {debugEnabled && lastDebug.length > 0 && (
-            <button
-              style={styles.iconBtn}
-              onClick={() => setDebugOpen((v) => !v)}
-              title="Show debug log"
-            >
-              {debugOpen ? "▼" : "▶"}
-            </button>
-          )}
-        </div>
+        <button
+          style={{ ...styles.iconBtn, color: debugEnabled ? "#e5342a" : "rgba(255,255,255,0.4)" }}
+          title="Settings"
+          onClick={() => setDebugOpen((v) => !v)}
+        >
+          ⚙
+        </button>
       </div>
 
       <InteractionHistory interactions={interactions} />
 
-      {debugEnabled && debugOpen && <DebugPanel entries={lastDebug} />}
+      {debugOpen && (
+        <SettingsPanel
+          debugEnabled={debugEnabled}
+          onToggleDebug={() => setDebugEnabled((v) => !v)}
+          lastDebug={lastDebug}
+        />
+      )}
 
       <div style={styles.footer}>
         <div style={styles.statusLabel}>
@@ -110,6 +108,57 @@ export default function App() {
     </div>
   );
 }
+
+function SettingsPanel({
+  debugEnabled,
+  onToggleDebug,
+  lastDebug,
+}: {
+  debugEnabled: boolean;
+  onToggleDebug: () => void;
+  lastDebug: DebugEntry[];
+}) {
+  return (
+    <div style={settingsStyles.panel}>
+      <div style={settingsStyles.row}>
+        <span style={settingsStyles.label}>Debug tool calls</span>
+        <button onClick={onToggleDebug} style={{
+          ...settingsStyles.toggle,
+          background: debugEnabled ? "#e5342a" : "rgba(255,255,255,0.1)",
+        }}>
+          {debugEnabled ? "On" : "Off"}
+        </button>
+      </div>
+      {debugEnabled && lastDebug.length > 0 && <DebugPanel entries={lastDebug} />}
+    </div>
+  );
+}
+
+const settingsStyles = {
+  panel: {
+    borderTop: "1px solid rgba(255,255,255,0.08)",
+    padding: "10px 14px",
+    flexShrink: 0,
+    background: "rgba(0,0,0,0.2)",
+  },
+  row: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  label: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.5)",
+  },
+  toggle: {
+    border: "none",
+    borderRadius: 6,
+    padding: "3px 10px",
+    fontSize: 11,
+    color: "#fff",
+    cursor: "pointer",
+  },
+} as const;
 
 const styles = {
   shell: {
