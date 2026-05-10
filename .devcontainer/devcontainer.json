@@ -1,0 +1,36 @@
+{
+  "name": "Apple Music Voice Control",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "latest",
+      "profile": "minimal"
+    },
+    "ghcr.io/oven-sh/features/bun:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [7777, 7778],
+  "postCreateCommand": "cd mcp-server && bun install && cd ../host-bridge && bun install",
+  "remoteEnv": {
+    "BRIDGE_URL": "http://host.docker.internal:7778"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "tauri-apps.tauri-vscode",
+        "rust-lang.rust-analyzer",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/data,target=/workspace/data,type=bind"
+  ]
+}

@@ -1,0 +1,26 @@
+services:
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    ports:
+      - "7777:7777"
+    volumes:
+      - ./data:/app/data
+      - ./secrets:/app/secrets:ro
+    environment:
+      BRIDGE_URL: http://host.docker.internal:7778
+      MUSICKIT_KEY_ID: ${MUSICKIT_KEY_ID}
+      MUSICKIT_TEAM_ID: ${MUSICKIT_TEAM_ID}
+      MUSICKIT_PRIVATE_KEY_PATH: /app/secrets/musickit.p8
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      DB_PATH: /app/data/library.db
+      PORT: 7777
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7777/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
